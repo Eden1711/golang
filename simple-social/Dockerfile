@@ -10,7 +10,7 @@ FROM alpine:3.19
 WORKDIR /app
 # Copy file thực thi từ giai đoạn 1 sang giai đoạn 2
 COPY --from=builder /app/main .
-# COPY app.env . 
+COPY app.env . 
 # (Lưu ý: Nếu bạn dùng file config app.env thì nhớ copy, nếu không thì bỏ dòng trên)
 
 # Mở cổng 8080

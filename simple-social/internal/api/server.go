@@ -2,19 +2,22 @@ package api
 
 import (
 	"simple-social/internal/service"
+	"simple-social/util"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
+	config      util.Config
 	userService service.UserService
 	postService service.PostService
 	Router      *gin.Engine
 }
 
 // NewServer khởi tạo Server và Setup Router
-func NewServer(userSvc service.UserService, postSvc service.PostService) *Server {
+func NewServer(config util.Config, userSvc service.UserService, postSvc service.PostService) *Server {
 	server := &Server{
+		config:      config,
 		userService: userSvc, // Gán Service vào struct
 		postService: postSvc,
 	}
@@ -30,7 +33,7 @@ func (s *Server) setupRouter() {
 		v1.POST("/register", s.registerUser)
 		v1.POST("/login", s.loginUser)
 		// 👇 Nhóm API cần bảo vệ
-		authRoutes := v1.Group("/").Use(authMiddleware())
+		authRoutes := v1.Group("/").Use(s.authMiddleware())
 		{
 			authRoutes.POST("/posts", s.createPost)
 			// 👇 Thêm dòng này: GET /users/me

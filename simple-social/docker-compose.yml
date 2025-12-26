@@ -20,6 +20,7 @@ services:
     environment:
       # QUAN TRỌNG: Hostname là 'postgres' (tên service ở trên), KHÔNG PHẢI 'localhost'
       - DB_SOURCE=postgres://myuser:secret@db:5432/simple_social?sslmode=disable
+      - SERVER_ADDRESS=0.0.0.0:8080
     depends_on:
       - db # Chờ DB chạy xong mới chạy App
 volumes:

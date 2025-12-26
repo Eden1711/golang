@@ -38,11 +38,12 @@ type UserService interface {
 }
 
 type userService struct {
-	store *db.Queries
+	store  *db.Queries
+	config util.Config
 }
 
-func NewUserService(store *db.Queries) UserService {
-	return &userService{store: store}
+func NewUserService(store *db.Queries, config util.Config) UserService {
+	return &userService{store: store, config: config}
 }
 
 func (s *userService) FollowUser(ctx context.Context, req FollowUserReq) error {
@@ -104,7 +105,7 @@ func (s *userService) Login(ctx context.Context, req LoginReq) (LoginResponse, e
 
 	// 3. Mật khẩu đúng -> Tạo Token (Vé thông hành)
 	// Token sống trong 24 giờ
-	token, err := util.CreateToken(user.Username, 24*time.Hour)
+	token, err := util.CreateToken(user.Username, 24*time.Hour, s.config.TokenSecret)
 	if err != nil {
 		return LoginResponse{}, err
 	}

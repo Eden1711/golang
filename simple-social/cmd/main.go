@@ -3,37 +3,36 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"simple-social/internal/api"
 	"simple-social/internal/db"
 	"simple-social/internal/service"
+	"simple-social/util"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	dsn := "postgres://myuser:secret@localhost:5432/simple_social?sslmode=disable"
 
-	if envDSN := os.Getenv("DB_SOURCE"); envDSN != "" {
-		dsn = envDSN
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("Không thể load config:", err)
 	}
 
-	// In ra để kiểm tra xem nó đang kết nối đi đâu
-	log.Println("Đang kết nối tới DB:", dsn)
+	log.Println("Đang kết nối tới DB:", config.DBSource)
 
-	pool, err := pgxpool.New(context.Background(), dsn)
+	pool, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal("Không thể kết nối DB:", err)
 	}
 	defer pool.Close()
 
 	// 2. Dependency Injection
-	store := db.New(pool)                // Repository
-	svc := service.NewUserService(store) // Service
-	pvc := service.NewPostService(store) // Service
-	server := api.NewServer(svc, pvc)    // Server
+	store := db.New(pool)                        // Repository
+	svc := service.NewUserService(store, config) // Service
+	pvc := service.NewPostService(store)         // Service
+	server := api.NewServer(config, svc, pvc)    // Server
 
 	// 3. Chạy
-	log.Println("Bank Server running on :8080")
-	server.Router.Run(":8080")
+	log.Println("Bank Server running on: ", config.ServerAddress)
+	server.Router.Run(config.ServerAddress)
 }

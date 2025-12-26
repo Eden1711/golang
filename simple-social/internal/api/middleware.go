@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func authMiddleware() gin.HandlerFunc {
+func (s *Server) authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 1. Lấy header Authorization
 		authHeader := c.GetHeader("Authorization")
@@ -26,7 +26,7 @@ func authMiddleware() gin.HandlerFunc {
 
 		// 3. Lấy token và Verify
 		accessToken := fields[1]
-		claims, err := util.VerifyToken(accessToken)
+		claims, err := util.VerifyToken(accessToken, s.config.TokenSecret)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
 			return
