@@ -1,0 +1,45 @@
+### Register
+POST http://localhost:8080/api/v1/register
+Content-Type: application/json
+
+{
+    "Username":  "Key",
+	"Password": "12345678",
+	"Fullname": "Key Tran",
+    "Email": "Key@gmail.com"
+}
+
+### Login
+POST http://localhost:8080/api/v1/login
+Content-Type: application/json
+
+{
+    "Username":  "Key",
+	"Password": "12345678"
+}
+
+### Get profile
+GET http://localhost:8080/api/v1/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjY4MDk5MDEsImlhdCI6MTc2NjcyMzUwMSwidXNlcm5hbWUiOiJLZXkifQ.18pS0JXOAQjduRhM0FsAC1LnWYi3-bWsCcGk5zXonFY
+
+### Follow user
+POST http://localhost:8080/api/v1/follow
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjY4MDgyNzAsImlhdCI6MTc2NjcyMTg3MCwidXNlcm5hbWUiOiJLZXkifQ.o78k-hH_uZp1jnIX5MjWJMkQIx7dMYZ8_7W2iDVOCOM
+
+{
+    "following_id": 1
+}
+
+
+### Create Post
+POST http://localhost:8080/api/v1/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjY4MDgyNzAsImlhdCI6MTc2NjcyMTg3MCwidXNlcm5hbWUiOiJLZXkifQ.o78k-hH_uZp1jnIX5MjWJMkQIx7dMYZ8_7W2iDVOCOM
+
+{
+    "Content": "First Post"
+}
+
+### Get New Feed
+GET http://localhost:8080/api/v1/posts/feed?page_id=1&page_size=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjY4MDgyNzAsImlhdCI6MTc2NjcyMTg3MCwidXNlcm5hbWUiOiJLZXkifQ.o78k-hH_uZp1jnIX5MjWJMkQIx7dMYZ8_7W2iDVOCOM

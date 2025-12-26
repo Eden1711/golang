@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: simple_social
+    restart: always
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=simple_social
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Dịch vụ 2: Backend API (Code Go của bạn)
+  api:
+    build: . # Build từ Dockerfile ở thư mục hiện tại
+    ports:
+      - "8080:8080"
+    environment:
+      # QUAN TRỌNG: Hostname là 'postgres' (tên service ở trên), KHÔNG PHẢI 'localhost'
+      - DB_SOURCE=postgres://myuser:secret@db:5432/simple_social?sslmode=disable
+    depends_on:
+      - db # Chờ DB chạy xong mới chạy App
+volumes:
+  postgres_data:
