@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Go Chat Realtime</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      #chat-box {
+        width: 100%;
+        height: 300px;
+        border: 1px solid #ccc;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+        padding: 10px;
+      }
+      .msg {
+        margin-bottom: 5px;
+      }
+      .broadcast {
+        color: blue;
+      }
+      .private {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Go Chat Room</h2>
+
+    <div id="login-screen">
+      <input
+        type="text"
+        id="username"
+        placeholder="Nhập tên bạn (vd: Batman)..."
+      />
+      <button onclick="connect()">Tham gia Chat</button>
+    </div>
+
+    <div id="chat-screen" style="display: none">
+      <h3>Xin chào, <span id="my-name"></span></h3>
+      <div id="chat-box"></div>
+
+      <input
+        type="text"
+        id="recipient"
+        placeholder="Tên người nhận (để trống nếu chat all)"
+      />
+      <input
+        type="text"
+        id="content"
+        placeholder="Nội dung tin nhắn..."
+        style="width: 50%"
+      />
+      <button onclick="send()">Gửi</button>
+    </div>
+
+    <script>
+      let socket;
+      let myName;
+
+      function connect() {
+        myName = document.getElementById("username").value;
+        if (!myName) return alert("Vui lòng nhập tên!");
+
+        // 👇 KẾT NỐI WEBSOCKET TẠI ĐÂY
+        socket = new WebSocket("ws://localhost:8080/ws?name=" + myName);
+
+        socket.onopen = () => {
+          console.log("Đã kết nối!");
+          document.getElementById("login-screen").style.display = "none";
+          document.getElementById("chat-screen").style.display = "block";
+          document.getElementById("my-name").innerText = myName;
+        };
+
+        socket.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          const box = document.getElementById("chat-box");
+
+          let html = "";
+          if (msg.type === "private") {
+            html = `<div class="msg private">[Mật] ${msg.sender}: ${msg.content}</div>`;
+          } else {
+            html = `<div class="msg broadcast">${msg.sender}: ${msg.content}</div>`;
+          }
+
+          box.innerHTML += html;
+          box.scrollTop = box.scrollHeight; // Tự cuộn xuống cuối
+        };
+
+        socket.onclose = () => alert("Mất kết nối với Server!");
+        socket.onerror = (err) => console.error("Lỗi Socket:", err);
+      }
+
+      function send() {
+        const recipient = document.getElementById("recipient").value;
+        const content = document.getElementById("content").value;
+
+        const msg = {
+          type: recipient ? "private" : "broadcast",
+          sender: myName,
+          recipient: recipient,
+          content: content,
+        };
+
+        socket.send(JSON.stringify(msg));
+        document.getElementById("content").value = ""; // Xóa ô nhập
+
+        // Hiện tin nhắn mình vừa gửi lên màn hình luôn cho trực quan
+        const box = document.getElementById("chat-box");
+        box.innerHTML += `<div class="msg" style="color: #666">Tôi: ${content}</div>`;
+      }
+    </script>
+  </body>
+</html>
