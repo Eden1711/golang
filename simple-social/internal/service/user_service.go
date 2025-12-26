@@ -38,11 +38,11 @@ type UserService interface {
 }
 
 type userService struct {
-	store  *db.Queries
+	store  db.Querier
 	config util.Config
 }
 
-func NewUserService(store *db.Queries, config util.Config) UserService {
+func NewUserService(store db.Querier, config util.Config) UserService {
 	return &userService{store: store, config: config}
 }
 
