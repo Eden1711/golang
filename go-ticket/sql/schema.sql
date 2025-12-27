@@ -1,0 +1,4 @@
+CREATE TABLE tickets (
+    id SERIAL PRIMARY KEY,
+    quantity INT NOT NULL DEFAULT 0
+);

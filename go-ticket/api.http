@@ -1,0 +1,5 @@
+### GetAllTicket
+GET  http://localhost:8080/ticket
+
+### Reset ticket
+POST http://localhost:8080/reset
