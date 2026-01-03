@@ -1,0 +1,13 @@
+### Login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "123456"
+}
+
+
+### Dasborad
+GET http://localhost:8080/admin/dashboard
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njc0MDY0ODksInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4ifQ.54dbiel-5fculmlj35n1wbyNbO6LGZcCcwKTSVDRq7M
