@@ -1,0 +1,24 @@
+syntax = "proto3"; // Phiên bản mới nhất
+
+package user;
+
+// Cấu hình đường dẫn cho code Go sinh ra
+option go_package = "go-grpc-demo/proto";
+
+// 1. Định nghĩa Service
+service UserService {
+  // Hàm lấy User theo ID
+  rpc GetUser (UserRequest) returns (UserResponse);
+}
+
+// 2. Định nghĩa Dữ liệu gửi đi (Request)
+message UserRequest {
+  int32 id = 1;
+}
+
+// 3. Định nghĩa Dữ liệu trả về (Response)
+message UserResponse {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
