@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  # 1. Service Auth (Server gRPC)
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth_service/Dockerfile
+    container_name: go_auth_container
+    ports:
+      - "50051:50051" # Map port ra ngoài (để debug nếu cần)
+    networks:
+      - go-network
+
+  # 2. Service Gateway (Client HTTP)
+  api-gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: go_gateway_container
+    ports:
+      - "8080:8080" # Map port web ra ngoài để user truy cập
+    environment:
+      # 🔥 QUAN TRỌNG: Chỉ định địa chỉ của Auth Service
+      # Trong mạng Docker, tên service "auth-service" chính là domain/IP
+      - AUTH_SERVICE_HOST=auth-service:50051
+    depends_on:
+      - auth-service # Chờ Auth chạy trước rồi mới chạy Gateway
+    networks:
+      - go-network
+
+# Tạo mạng nội bộ để 2 thằng nói chuyện với nhau
+networks:
+  go-network:
+    driver: bridge

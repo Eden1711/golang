@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	pb "go-gateway-jwt/proto"
@@ -17,8 +18,13 @@ import (
 var jwtKey = []byte("bi_mat_khong_the_bat_mi") // Phải khớp với Auth Service
 
 func main() {
+	authHost := os.Getenv("AUTH_SERVICE_HOST")
+	if authHost == "" {
+		authHost = "localhost:50051" // Mặc định chạy local
+	}
+
 	// 1. Kết nối tới Auth Service qua gRPC
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(authHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Không kết nối được Auth Service: %v", err)
 	}
