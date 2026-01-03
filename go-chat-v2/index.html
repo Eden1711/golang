@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Go Chat</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      #log {
+        height: 300px;
+        border: 1px solid #ddd;
+        overflow-y: scroll;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .msg {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Golang WebSocket Chat</h1>
+    <div id="log"></div>
+    <form id="form">
+      <input type="text" id="msg" size="64" autofocus autocomplete="off" />
+      <input type="submit" value="Gửi" />
+    </form>
+
+    <script>
+      var conn;
+      var log = document.getElementById("log");
+
+      function appendLog(item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
+        if (doScroll) {
+          log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+      }
+
+      document.getElementById("form").onsubmit = function () {
+        if (!conn) return false;
+        var msg = document.getElementById("msg");
+        if (!msg.value) return false;
+        conn.send(msg.value); // Gửi tin lên server
+        msg.value = "";
+        return false;
+      };
+
+      if (window["WebSocket"]) {
+        // Kết nối tới Server Go
+        conn = new WebSocket("ws://" + document.location.host + "/ws");
+
+        conn.onclose = function (evt) {
+          var item = document.createElement("div");
+          item.innerHTML = "<b>Kết nối đã đóng.</b>";
+          appendLog(item);
+        };
+
+        conn.onmessage = function (evt) {
+          // Nhận tin từ Server bắn về
+          var messages = evt.data.split("\n");
+          for (var i = 0; i < messages.length; i++) {
+            var item = document.createElement("div");
+            item.innerText = messages[i];
+            item.className = "msg";
+            appendLog(item);
+          }
+        };
+      } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Trình duyệt của bạn không hỗ trợ WebSocket.</b>";
+        appendLog(item);
+      }
+    </script>
+  </body>
+</html>
