@@ -10,4 +10,4 @@ Content-Type: application/json
 
 ### Dasborad
 GET http://localhost:8080/admin/dashboard
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njc0MDc0NDcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4ifQ.YIvFC3gNHDTrYrNtrJ8QIlZURirs76TtFDGc2KxqqvY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njc0MDgyMTQsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4ifQ.6lc_ncFyUQELNBOa1VZmHooPLO5_B3nXtugp_fvXktA

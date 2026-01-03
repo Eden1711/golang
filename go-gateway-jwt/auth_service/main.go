@@ -7,9 +7,12 @@ import (
 	"net"
 	"time"
 
+	"go-gateway-jwt/pkg/telemetry"
 	pb "go-gateway-jwt/proto"
 
 	"github.com/golang-jwt/jwt/v5"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 )
 
@@ -21,6 +24,18 @@ type server struct {
 }
 
 func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	// 1. TẠO SPAN CON (ĐỂ SOI CHI TIẾT)
+	// Giả sử ta muốn đo xem việc "Check DB" tốn bao lâu
+	tracer := otel.Tracer("auth-service")
+	// Tạo 1 đoạn trace con tên là "database_check"
+	ctx, span := tracer.Start(ctx, "database_check")
+
+	// Giả vờ ngủ 500ms để mô phỏng DB chậm
+	time.Sleep(500 * time.Millisecond)
+
+	// Kết thúc đo đạc
+	span.End()
+
 	// 1. Giả lập check DB
 	// Trong thực tế bạn sẽ query Database ở đây
 	if req.Username != "admin" || req.Password != "123456" {
@@ -46,12 +61,20 @@ func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 }
 
 func main() {
+	// KHỞI TẠO TRACER
+	shutdown := telemetry.InitTracer("auth-service", "jaeger:4317")
+	defer shutdown(context.Background())
+
 	lis, err := net.Listen("tcp", ":50051") // Chạy ở cổng 50051
 	if err != nil {
 		log.Fatalf("Lỗi mở cổng: %v", err)
 	}
 
-	s := grpc.NewServer()
+	// GẮN INTERCEPTOR CHO SERVER GRPC
+	// Để nó hiểu và nối tiếp TraceID từ Gateway gửi sang
+	s := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()), // 👈 QUAN TRỌNG
+	)
 	pb.RegisterAuthServiceServer(s, &server{})
 
 	fmt.Println("🔐 Auth Service (gRPC) đang chạy tại :50051...")

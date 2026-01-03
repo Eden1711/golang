@@ -29,6 +29,17 @@ services:
     networks:
       - go-network
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger_container
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Cổng Web UI (để bạn vào xem biểu đồ)
+      - "4317:4317" # Cổng nhận dữ liệu từ code Go (gRPC)
+    networks:
+      - go-network
+
 # Tạo mạng nội bộ để 2 thằng nói chuyện với nhau
 networks:
   go-network:

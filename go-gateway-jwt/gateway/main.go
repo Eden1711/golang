@@ -7,24 +7,34 @@ import (
 	"os"
 	"strings"
 
-	pb "go-gateway-jwt/proto"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin" // 👇 Import
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"  // 👇 Import
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"go-gateway-jwt/pkg/telemetry" // 👇 Import pkg vừa tạo
+	pb "go-gateway-jwt/proto"
 )
 
 var jwtKey = []byte("bi_mat_khong_the_bat_mi") // Phải khớp với Auth Service
 
 func main() {
+	// 1. KHỞI TẠO TRACER
+	// Jaeger chạy ở port 4317 trong mạng Docker
+	shutdown := telemetry.InitTracer("api-gateway", "jaeger:4317")
+	defer shutdown(context.Background())
+
 	authHost := os.Getenv("AUTH_SERVICE_HOST")
 	if authHost == "" {
 		authHost = "localhost:50051" // Mặc định chạy local
 	}
 
-	// 1. Kết nối tới Auth Service qua gRPC
-	conn, err := grpc.NewClient(authHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// 2. THÊM OPTION CHO GRPC CLIENT
+	// otelgrpc.UnaryClientInterceptor giúp tự động nhét TraceID vào header gRPC
+	conn, err := grpc.NewClient(authHost, grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler())) // 👈 QUAN TRỌNG
 	if err != nil {
 		log.Fatalf("Không kết nối được Auth Service: %v", err)
 	}
@@ -32,6 +42,9 @@ func main() {
 	authClient := pb.NewAuthServiceClient(conn)
 
 	r := gin.Default()
+	// 3. GẮN MIDDLEWARE CHO GIN
+	// Tự động tạo Trace cho mỗi request HTTP vào Gateway
+	r.Use(otelgin.Middleware("api-gateway"))
 
 	// 2. API Public: Đăng nhập (Ai cũng gọi được)
 	r.POST("/login", func(c *gin.Context) {
